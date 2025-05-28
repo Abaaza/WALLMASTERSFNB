@@ -1,0 +1,109 @@
+.sliderWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+/* Each slide container */
+.slide {
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  flex: 1 0 auto;
+  max-width: 50%; /* 2 slides visible => 50% each */
+  box-sizing: border-box;
+  padding: 0 5px; /* Slight horizontal padding */
+}
+
+/* Placeholder for skeleton (just ensures consistent 1:1 space) */
+.imagePlaceholder {
+  width: 100%;
+  aspect-ratio: 1/1; /* Maintain 1:1 aspect ratio */
+  border-radius: 10px;
+}
+
+/* Actual product image */
+.image {
+  width: 100%;
+  aspect-ratio: 1/1; /* Maintain 1:1 aspect ratio */
+  object-fit: cover;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+/* Container with name & meta info */
+.infoContainer {
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Slide 'card' container */
+.details {
+  cursor: pointer;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.details:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.productName {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.metaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metaText {
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Navigation arrows container */
+.buttonBack, .buttonNext {
+  position: absolute;
+  top: 150px; /* Adjust this value based on your slider height */
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background 0.3s ease;
+}
+
+.buttonBack:hover,
+.buttonNext:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+/* Position left arrow */
+.buttonBack {
+  left: 8px;
+}
+
+/* Position right arrow */
+.buttonNext {
+  right: 8px;
+}

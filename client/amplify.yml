@@ -1,0 +1,16 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm install
+    build:
+      commands:
+        - npm run build # Ensure this creates the 'dist' folder or update as needed
+  artifacts:
+    baseDirectory: dist # Change to 'dist' if Vite's output is in this directory
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*

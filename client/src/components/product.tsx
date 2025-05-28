@@ -1,6 +1,8 @@
 import i18n from "../assets/i18n";
 import { useEffect, useState } from "react";
 import { Product } from "./types";
+import { API_BASE_URL } from "../api";
+
 
 // Helper function to convert numbers to Arabic numerals
 const convertToArabicNumbers = (input: string | number): string => {
@@ -55,9 +57,8 @@ const useTranslatedProducts = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/products"
-        );
+        const response = await fetch(`${API_BASE_URL}/products`);
+
         const data = await response.json();
         if (Array.isArray(data)) {
           setProducts(data);

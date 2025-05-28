@@ -750,8 +750,16 @@ app.post("/refresh-token", async (req, res) => {
   }
 });
 
-// ------------------ SERVERLESS HANDLER ------------------
-const handler = serverless(app);
-module.exports.handler = async (event, context) => {
-  return await handler(event, context);
-};
+// ------------------ SERVER OR SERVERLESS HANDLER ------------------
+if (require.main === module) {
+  // If run directly, start an express server
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+} else {
+  // Export handler for serverless platforms
+  const handler = serverless(app);
+  module.exports.handler = async (event, context) => {
+    return await handler(event, context);
+  };
+}

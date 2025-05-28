@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import {
   useColorModeValue,
   Box,
@@ -46,7 +47,7 @@ const ChangePassword: React.FC = () => {
     try {
       // Send a POST request to your API with email, oldPassword, and newPassword
       const response = await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/change-password",
+        `${API_BASE_URL}/change-password`,
         {
           email,
           oldPassword,

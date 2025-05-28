@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import { getAuthToken, clearUserData } from "./authUtils";
 
 type FocusableElement = HTMLButtonElement | null;
@@ -81,7 +82,7 @@ const ProfilePage: React.FC = () => {
 
       try {
         const response = await axios.get(
-          "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/user/details",
+          `${API_BASE_URL}/user/details`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

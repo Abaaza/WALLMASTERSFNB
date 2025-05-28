@@ -22,6 +22,7 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import { FaHeart } from "react-icons/fa";
+import { API_BASE_URL } from "../api";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartReducer";
 import DesktopProductSlider from "./DesktopProductSlider";
@@ -71,7 +72,7 @@ const ProductPage: React.FC = () => {
 
     try {
       const response = await axios.get(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/saved-items/${userId}`,
+        `${API_BASE_URL}/saved-items/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -157,7 +158,7 @@ const ProductPage: React.FC = () => {
 
     try {
       await axios.post(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/save-for-later/${userId}`,
+        `${API_BASE_URL}/save-for-later/${userId}`,
         { product: productData },
         {
           headers: {

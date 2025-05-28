@@ -11,6 +11,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
+
 
 type Product = {
   productId: string;
@@ -135,7 +137,7 @@ const MyOrders: React.FC = () => {
       }
 
       const response = await axios.get<Order[]>(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/orders/${userId}`
+        `${API_BASE_URL}/orders/${userId}`
       );
 
       setOrders(response.data);

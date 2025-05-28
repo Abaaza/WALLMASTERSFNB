@@ -1,4 +1,6 @@
 import axios from "axios";
+import { API_BASE_URL } from "../api";
+
 
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
@@ -19,7 +21,7 @@ async function refreshAccessToken() {
   }
 
   const response = await axios.post(
-    "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/refresh-token",
+    `${API_BASE_URL}/refresh-token`,
     { refreshToken }
   );
 

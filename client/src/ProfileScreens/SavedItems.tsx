@@ -10,6 +10,7 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import SavedProductCard from "../components/SavedProductCard";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -67,7 +68,7 @@ const SavedItems: React.FC = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get<Product[]>(
-          "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/products",
+          `${API_BASE_URL}/products`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setAllProducts(response.data);
@@ -86,7 +87,7 @@ const SavedItems: React.FC = () => {
     const fetchSavedItems = async () => {
       try {
         const response = await axios.get<SavedItem[]>(
-          `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/saved-items/${cleanedUserId}`,
+          `${API_BASE_URL}/saved-items/${cleanedUserId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSavedItems(response.data);
@@ -144,7 +145,7 @@ const SavedItems: React.FC = () => {
   const handleRemove = async (productId: string) => {
     try {
       await axios.delete(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/saved-items/${cleanedUserId}/${productId}`,
+        `${API_BASE_URL}/saved-items/${cleanedUserId}/${productId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSavedItems((prevItems) =>

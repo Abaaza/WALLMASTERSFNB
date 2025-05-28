@@ -17,6 +17,8 @@ import ReactGA from "react-ga4";
 import { AuthProvider } from "./components/authContext";
 import axios from "axios";
 import "../src/ProfileScreens/axiosSetup";
+import { API_BASE_URL } from "./api";
+
 
 ReactGA.initialize("G-98H33R3ELB");
 
@@ -80,7 +82,7 @@ function AppContent() {
         );
         try {
           const response = await axios.post(
-            "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/refresh-token",
+            `${API_BASE_URL}/refresh-token`,
             { refreshToken }
           );
           const {

@@ -25,6 +25,7 @@ import { IoPersonOutline } from "react-icons/io5";
 import { AiOutlineLock } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/userSlice";
 
@@ -55,12 +56,12 @@ const Login: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/login",
-        { email: email.toLowerCase(), password }
-      );
+      const response = await axios.post(`${API_BASE_URL}/login`, {
+        email: email.toLowerCase(),
+        password,
+      });
 
-      const { token, refreshToken, user } = response.data; // Ensure backend returns refreshToken
+      const { token, refreshToken, user } = response.data;
       const userId = user?._id;
 
       if (token && refreshToken && userId) {
@@ -80,7 +81,7 @@ const Login: React.FC = () => {
       } else {
         throw new Error("Invalid response from server");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Login error:", error);
       toast({
         title: "Login Error",
@@ -107,10 +108,10 @@ const Login: React.FC = () => {
     }
 
     try {
-      await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/request-password-reset",
-        { email: resetEmail }
-      );
+      await axios.post(`${API_BASE_URL}/request-password-reset`, {
+        email: resetEmail,
+      });
+
       toast({
         title: "Reset Email Sent",
         description: "Check your inbox for password reset instructions.",
@@ -120,7 +121,7 @@ const Login: React.FC = () => {
       });
       setIsForgotPasswordOpen(false);
       setResetEmail("");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Forgot password error:", error);
       toast({
         title: "Error",
@@ -131,6 +132,7 @@ const Login: React.FC = () => {
       });
     }
   };
+
   return (
     <Center h="50vh" bg="#fff">
       <VStack
@@ -145,6 +147,7 @@ const Login: React.FC = () => {
         <Text fontSize="2xl" fontWeight="600">
           Login to your Account
         </Text>
+
         <InputGroup>
           <InputLeftElement pointerEvents="none">
             <Icon as={IoPersonOutline} color="gray.500" />
@@ -188,6 +191,7 @@ const Login: React.FC = () => {
             </Button>
           </InputRightElement>
         </InputGroup>
+
         <Button
           bg="#ff6347"
           color="white"
@@ -201,19 +205,20 @@ const Login: React.FC = () => {
         >
           Login
         </Button>
+
         <Text fontSize="sm" color="gray.500">
           Don't have an account?{" "}
           <Link color="blue.500" onClick={() => navigate("/register")}>
             Sign Up
           </Link>
         </Text>
+
         <Text fontSize="sm" color="gray.500">
           <Link onClick={() => setIsForgotPasswordOpen(true)} color="blue.500">
             Forgot Password?
           </Link>
         </Text>
 
-        {/* Forgot Password Modal */}
         <Modal
           isOpen={isForgotPasswordOpen}
           onClose={() => setIsForgotPasswordOpen(false)}

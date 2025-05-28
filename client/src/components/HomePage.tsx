@@ -15,6 +15,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -67,7 +68,7 @@ const HomePage: React.FC = () => {
 
     try {
       await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/send-email",
+        `${API_BASE_URL}/send-email`,
         {
           name,
           email,

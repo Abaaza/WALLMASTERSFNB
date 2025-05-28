@@ -10,6 +10,7 @@ import {
   Center,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 import { useNavigate } from "react-router-dom";
 import { getUserId, getAuthToken, clearUserData } from "./authUtils";
 
@@ -60,7 +61,7 @@ const SavedAddresses: React.FC = () => {
     const loadSavedAddresses = async () => {
       try {
         const response = await axios.get<Address[]>(
-          `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}`,
+          `${API_BASE_URL}/addresses/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         let sortedAddresses = response.data.sort((a, b) =>
@@ -74,7 +75,7 @@ const SavedAddresses: React.FC = () => {
         ) {
           await setDefaultAddress(sortedAddresses[0]._id, false);
           const refresh = await axios.get<Address[]>(
-            `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}`,
+            `${API_BASE_URL}/addresses/${userId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           sortedAddresses = refresh.data.sort((a, b) =>
@@ -110,7 +111,7 @@ const SavedAddresses: React.FC = () => {
 
     try {
       await axios.delete(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}/${id}`,
+        `${API_BASE_URL}/addresses/${userId}/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -124,7 +125,7 @@ const SavedAddresses: React.FC = () => {
       if (updated.length > 0 && !updated.some((addr) => addr.isDefault)) {
         await setDefaultAddress(updated[0]._id, false);
         const refresh = await axios.get<Address[]>(
-          `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}`,
+          `${API_BASE_URL}/addresses/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const sorted = refresh.data.sort((a, b) =>
@@ -170,7 +171,7 @@ const SavedAddresses: React.FC = () => {
 
     try {
       await axios.put(
-        `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}/default/${addressId}`,
+        `${API_BASE_URL}/addresses/${userId}/default/${addressId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

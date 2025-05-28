@@ -10,6 +10,8 @@ import {
   Center,
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
+import { API_BASE_URL } from "../api";
+
 
 const ResetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -38,7 +40,7 @@ const ResetPassword: React.FC = () => {
     setError("");
     try {
       const response = await fetch(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/reset-password",
+        `${API_BASE_URL}/reset-password`,
         {
           method: "POST",
           headers: {

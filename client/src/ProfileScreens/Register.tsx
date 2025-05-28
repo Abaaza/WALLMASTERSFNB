@@ -19,6 +19,8 @@ import { MdEmail } from "react-icons/md";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
+
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -42,7 +44,7 @@ const Register: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/register",
+        `${API_BASE_URL}/register`,
         { name, email: email.toLowerCase(), password }
       );
 

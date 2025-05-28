@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "backend",
   "main": "index.js",
-"scripts": {
-  "dev": "nodemon index.js"
-},
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
   "author": "",
   "dependencies": {
     "bcrypt": "^5.1.1",

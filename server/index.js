@@ -86,8 +86,13 @@ transporter.verify((error, success) => {
 });
 
 // Define Product schema and model
-const productSchema = new mongoose.Schema({}, { collection: "products" });
-const Product = mongoose.model("Product", productSchema);
+// Use `strict: false` so mongoose doesn't strip fields that aren't defined
+// in the schema. The products collection contains documents with dynamic
+// fields and we want to return them exactly as stored in MongoDB.
+const productSchema = new mongoose.Schema(
+  {},
+  { collection: "products", strict: false }
+);const Product = mongoose.model("Product", productSchema);
 
 // ------------------ ROUTES ------------------
 

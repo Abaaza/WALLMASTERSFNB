@@ -278,14 +278,18 @@ app.post("/orders", async (req, res) => {
         .join(", ")}\n\nPlease process this order as soon as possible.`,
     };
 
-    await Promise.all([
-      transporter.sendMail(customerMailOptions),
-      transporter.sendMail(adminMailOptions),
-    ]);
+       try {
+      await Promise.all([
+        transporter.sendMail(customerMailOptions),
+        transporter.sendMail(adminMailOptions),
+      ]);
+      console.log("Confirmation email sent to user and admin.");
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+    }
 
-    console.log("Confirmation email sent to user and admin.");
     res.status(201).json({
-      message: "Order placed successfully, emails sent.",
+      message: "Order placed successfully.",
       order: newOrder,
     });
   } catch (error) {

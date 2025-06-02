@@ -294,8 +294,15 @@ app.post("/orders", async (req, res) => {
     });
   } catch (error) {
     console.error("Order placement failed:", error);
-    res.status(500).json({ message: "Order placement failed", error });
-  }
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({ message: "Duplicate order detected. Please try again." });
+    }
+    res.status(500).json({ message: "Order placement failed" });  }
 });
 
 // Get User Orders

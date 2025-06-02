@@ -12,7 +12,10 @@ const productSchema = new mongoose.Schema({
 
 const shippingAddressSchema = new mongoose.Schema({
   houseNo: { type: String, required: true },
-  street: { type: String, required: true },
+  // Street was previously required, but the frontend treats the second
+  // address line as optional. Making it optional prevents validation
+  // errors when users leave it blank during checkout.
+  street: { type: String, required: false },
   city: { type: String, required: true },
   postalCode: { type: String, required: false },
   mobileNo: { type: String, required: true },

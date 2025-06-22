@@ -1,38 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "server/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/client/dist/$1"
-    }
-  ],
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist",
   "functions": {
     "server/index.js": {
       "maxDuration": 30
     }
   },
-  "env": {
-    "CONNECTION_STRING": "@connection_string",
-    "JWT_SECRET": "@jwt_secret",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASS": "@email_pass",
-    "JWT_REFRESH_SECRET": "@jwt_refresh_secret"
-  }
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/server/index.js"
+    }
+  ]
 } 

@@ -774,9 +774,6 @@ if (require.main === module) {
     console.log(`Server listening on port ${PORT}`);
   });
 } else {
-  // Export handler for serverless platforms
-  const handler = serverless(app);
-  module.exports.handler = async (event, context) => {
-    return await handler(event, context);
-  };
+  // Export handler for Vercel serverless functions
+  module.exports = serverless(app);
 }

@@ -20,19 +20,19 @@
     },
     {
       "src": "/assets/(.*)",
-      "dest": "/client/dist/assets/$1"
+      "dest": "/assets/$1"
     },
     {
-      "src": "/favicon.ico",
-      "dest": "/client/dist/favicon.ico"
+      "src": "/favicon\\.(ico|png)",
+      "dest": "/favicon.$1"
     },
     {
-      "src": "/favicon.png",
-      "dest": "/client/dist/favicon.png"
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/client/dist/index.html"
+      "dest": "/index.html"
     }
   ]
 } 

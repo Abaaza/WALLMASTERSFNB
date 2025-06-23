@@ -45,10 +45,15 @@ async function connectToDatabase() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(mongoURI, mongoOptions).then((mongoose) => {
-      console.log("Connected to MongoDB");
-      return mongoose;
-    }).catch((error) => {
+    cached.promise = Promise.race([
+      mongoose.connect(mongoURI, mongoOptions).then((mongoose) => {
+        console.log("Connected to MongoDB");
+        return mongoose;
+      }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('MongoDB connection timeout after 10 seconds')), 10000)
+      )
+    ]).catch((error) => {
       console.error("MongoDB connection failed:", error);
       cached.promise = null; // Reset promise on error
       throw error;
@@ -189,6 +194,8 @@ app.get("/", (req, res) => {
 // Health check endpoint
 app.get("/health", async (req, res) => {
   try {
+    console.log("Health check called");
+    
     // Check MongoDB connection
     const mongoStatus = mongoose.connection.readyState;
     const mongoStates = {
@@ -198,23 +205,49 @@ app.get("/health", async (req, res) => {
       3: "disconnecting"
     };
     
+    let dbTestResult = "not tested";
+    let dbError = null;
+    
+    try {
+      // Test database connection with timeout
+      await Promise.race([
+        connectToDatabase(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Health check DB timeout')), 5000)
+        )
+      ]);
+      
+      // Try to count products as a real DB test
+      const productCount = await Product.countDocuments();
+      dbTestResult = `connected (${productCount} products)`;
+    } catch (error) {
+      dbError = error.message;
+      dbTestResult = "failed";
+    }
+    
     res.json({
       status: "ok",
       timestamp: new Date().toISOString(),
       mongodb: {
         status: mongoStates[mongoStatus] || "unknown",
-        readyState: mongoStatus
+        readyState: mongoStatus,
+        testResult: dbTestResult,
+        error: dbError
       },
       environment: {
         hasConnectionString: !!process.env.CONNECTION_STRING,
         hasJwtSecret: !!process.env.JWT_SECRET,
-        hasEmailConfig: !!process.env.EMAIL_USER
+        hasEmailConfig: !!process.env.EMAIL_USER,
+        connectionStringPreview: process.env.CONNECTION_STRING ? 
+          process.env.CONNECTION_STRING.substring(0, 20) + "..." : "missing"
       }
     });
   } catch (error) {
+    console.error("Health check error:", error);
     res.status(500).json({
       status: "error",
-      error: error.message
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -222,10 +255,23 @@ app.get("/health", async (req, res) => {
 // Fetch All Products
 app.get("/products", async (req, res) => {
   try {
+    console.log("Products endpoint called");
+    console.log("MongoDB connection state:", mongoose.connection.readyState);
+    
+    // Ensure database connection
+    await connectToDatabase();
+    console.log("Database connection established");
+    
     const products = await Product.find();
+    console.log(`Found ${products.length} products`);
     res.json(products);
   } catch (error) {
-    res.status(500).send("Error fetching products.");
+    console.error("Products endpoint error:", error);
+    res.status(500).json({ 
+      message: "Error fetching products",
+      error: error.message,
+      connectionState: mongoose.connection.readyState
+    });
   }
 });
 

@@ -1,3 +1,5 @@
+console.log("Starting serverless function initialization...");
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -8,9 +10,13 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
+console.log("Dependencies loaded, loading models...");
+
 const User = require("./models/user");
 const Order = require("./models/order");
 const serverless = require("serverless-http");
+
+console.log("Models loaded, creating express app...");
 
 // Cache the database connection
 let cached = global.mongoose;
@@ -22,10 +28,14 @@ if (!cached) {
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the Heroku port or fallback to 3000
 
+console.log("Express app created, configuring middleware...");
+
 // Middleware
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+console.log("Middleware configured, setting up database connection...");
 
 // Database connection
 const mongoURI = process.env.CONNECTION_STRING;
@@ -73,25 +83,20 @@ async function connectToDatabase() {
   return cached.conn;
 }
 
-// Initialize database connection with timeout
-Promise.race([
-  connectToDatabase(),
-  new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Database connection timeout')), 10000)
-  )
-]).catch((err) => {
-  console.error("Initial MongoDB connection error:", err);
-  // Don't exit in serverless - let individual requests handle the error
-});
+// Don't initialize database connection at startup in serverless
+// Let individual requests handle the connection
 
 // Add request timeout middleware
 app.use((req, res, next) => {
   // Set a timeout for all requests
   const timeout = setTimeout(() => {
     if (!res.headersSent) {
+      console.error(`Request timeout for ${req.method} ${req.path}`);
       res.status(504).json({
         error: 'Request timeout',
-        message: 'The request took too long to process'
+        message: 'The request took too long to process',
+        path: req.path,
+        method: req.method
       });
     }
   }, 85000); // 85 seconds to stay under Vercel's 90s limit
@@ -111,12 +116,19 @@ const requiredEnvVars = [
   "EMAIL_PASS",
 ];
 
+// Check environment variables but don't exit in serverless
+let missingEnvVars = [];
 requiredEnvVars.forEach((varName) => {
   if (!process.env[varName]) {
     console.error(`Missing required environment variable: ${varName}`);
-    process.exit(1); // Exit the application if a required env var is missing
+    missingEnvVars.push(varName);
   }
 });
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing environment variables: ${missingEnvVars.join(', ')}`);
+  // Don't exit in serverless - let endpoints handle gracefully
+}
 
 // ------------------ UTILITIES ------------------
 const generateOrderId = () => {
@@ -136,6 +148,7 @@ const authenticate = (req, res, next) => {
   });
 };
 
+// Create transporter but don't verify at startup in serverless
 const transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
   port: 587,
@@ -147,16 +160,11 @@ const transporter = nodemailer.createTransport({
   tls: {
     ciphers: "SSLv3",
   },
-  debug: true, // Enable debug output
+  debug: false, // Disable debug to reduce noise
 });
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP Connection Error:", error);
-  } else {
-    console.log("SMTP Server is ready to take our messages");
-  }
-});
+// Don't verify SMTP connection at startup in serverless
+// Let individual email sends handle verification
 
 // Define Product schema and model
 // Use `strict: false` so mongoose doesn't strip fields that aren't defined
@@ -209,13 +217,60 @@ app.post("/login", async (req, res) => {
 
 // Root Route
 app.get("/", (req, res) => {
-  res.send("Hello from Wallmasters Backend!");
+  console.log("Root route called");
+  res.json({
+    message: "Hello from Wallmasters Backend!",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// Health check endpoint
-app.get("/health", async (req, res) => {
+// Minimal test endpoint
+app.get("/test", (req, res) => {
+  console.log("Test endpoint called");
+  res.json({
+    status: "working",
+    timestamp: new Date().toISOString(),
+    message: "Serverless function is working"
+  });
+});
+
+// Simple health check endpoint (no DB dependency)
+app.get("/health", (req, res) => {
   try {
-    console.log("Health check called");
+    console.log("Health check called - simple version");
+    
+    const healthData = {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: {
+        hasConnectionString: !!process.env.CONNECTION_STRING,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasEmailConfig: !!process.env.EMAIL_USER,
+        nodeVersion: process.version,
+        platform: process.platform
+      },
+      performance: {
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage()
+      }
+    };
+    
+    res.json(healthData);
+  } catch (error) {
+    console.error("Health check error:", error);
+    res.status(500).json({
+      status: "error",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Database health check endpoint
+app.get("/health/db", async (req, res) => {
+  try {
+    console.log("Database health check called");
     
     // Check MongoDB connection
     const mongoStatus = mongoose.connection.readyState;
@@ -262,17 +317,6 @@ app.get("/health", async (req, res) => {
         testResult: dbTestResult,
         productCount: productCount,
         error: dbError
-      },
-      environment: {
-        hasConnectionString: !!process.env.CONNECTION_STRING,
-        hasJwtSecret: !!process.env.JWT_SECRET,
-        hasEmailConfig: !!process.env.EMAIL_USER,
-        connectionStringPreview: process.env.CONNECTION_STRING ? 
-          process.env.CONNECTION_STRING.substring(0, 20) + "..." : "missing"
-      },
-      performance: {
-        uptime: process.uptime(),
-        memoryUsage: process.memoryUsage()
       }
     };
     
@@ -281,7 +325,7 @@ app.get("/health", async (req, res) => {
     
     res.status(statusCode).json(healthData);
   } catch (error) {
-    console.error("Health check error:", error);
+    console.error("Database health check error:", error);
     res.status(500).json({
       status: "error",
       error: error.message,
@@ -947,6 +991,8 @@ app.post("/refresh-token", async (req, res) => {
 });
 
 // ------------------ SERVER OR SERVERLESS HANDLER ------------------
+console.log("Setting up serverless handler...");
+
 if (require.main === module) {
   // If run directly, start an express server
   app.listen(PORT, () => {
@@ -954,5 +1000,6 @@ if (require.main === module) {
   });
 } else {
   // Export handler for Vercel serverless functions
+  console.log("Exporting serverless handler...");
   module.exports = serverless(app);
 }

@@ -12,6 +12,13 @@ const User = require("./models/user");
 const Order = require("./models/order");
 const serverless = require("serverless-http");
 
+// Cache the database connection
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the Heroku port or fallback to 3000
 
@@ -22,13 +29,43 @@ app.use(bodyParser.json());
 
 // Database connection
 const mongoURI = process.env.CONNECTION_STRING;
-mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1); // Exit if DB connection fails
-  });
+
+// Optimized MongoDB connection for serverless environment
+const mongoOptions = {
+  maxPoolSize: 1, // Optimize for serverless
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000,
+  bufferCommands: false, // Don't buffer commands when disconnected
+};
+
+// Connect to MongoDB with connection caching
+async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(mongoURI, mongoOptions).then((mongoose) => {
+      console.log("Connected to MongoDB");
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+// Initialize database connection
+connectToDatabase().catch((err) => {
+  console.error("MongoDB connection error:", err);
+  process.exit(1); // Exit if DB connection fails
+});
 
 const requiredEnvVars = [
   "CONNECTION_STRING",
@@ -137,6 +174,39 @@ app.post("/login", async (req, res) => {
 // Root Route
 app.get("/", (req, res) => {
   res.send("Hello from Wallmasters Backend!");
+});
+
+// Health check endpoint
+app.get("/health", async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const mongoStatus = mongoose.connection.readyState;
+    const mongoStates = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting"
+    };
+    
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      mongodb: {
+        status: mongoStates[mongoStatus] || "unknown",
+        readyState: mongoStatus
+      },
+      environment: {
+        hasConnectionString: !!process.env.CONNECTION_STRING,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasEmailConfig: !!process.env.EMAIL_USER
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: error.message
+    });
+  }
 });
 
 // Fetch All Products

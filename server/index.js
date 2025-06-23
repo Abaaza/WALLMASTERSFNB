@@ -22,8 +22,17 @@ app.use(bodyParser.json());
 
 // Database connection
 const mongoURI = process.env.CONNECTION_STRING;
+
+// Optimized MongoDB connection for serverless environment
+const mongoOptions = {
+  maxPoolSize: 1, // Optimize for serverless
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000,
+  bufferCommands: false, // Don't buffer commands when disconnected
+};
+
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongoURI, mongoOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);

@@ -78,3 +78,47 @@ All backend routes are accessible under `/api/*`:
 2. **Email not working**: Check EMAIL_USER and EMAIL_PASS credentials
 3. **CORS issues**: The backend allows all origins (`*`) - adjust as needed for production
 4. **Build errors**: Ensure all dependencies are listed in package.json files
+
+5. **Set environment variables in Vercel dashboard:**
+   - Go to Settings → Environment Variables
+   - Add all variables from `.env` file:
+     - `CONNECTION_STRING` - MongoDB connection string
+     - `JWT_SECRET` - JWT secret key
+     - `JWT_REFRESH_SECRET` - JWT refresh secret
+     - `EMAIL_USER` - Email for notifications
+     - `EMAIL_PASS` - Email password
+     - `VITE_API_BASE_URL` - Set to your production URL (e.g., https://your-app.vercel.app)
+
+## MongoDB Configuration for Serverless
+
+**Important:** The MongoDB connection has been optimized for serverless deployment:
+
+1. **Connection Options:**
+
+   - Removed deprecated options: `useNewUrlParser`, `useUnifiedTopology`, `bufferMaxEntries`
+   - Added serverless optimizations:
+     - `maxPoolSize: 1` - Limits connection pool for serverless
+     - `serverSelectionTimeoutMS: 5000` - Faster timeout for serverless
+     - `connectTimeoutMS: 10000` - Connection timeout
+     - `bufferCommands: false` - Don't buffer commands when disconnected
+
+2. **Connection Caching:**
+
+   - Implemented connection caching to reuse connections across function invocations
+   - Prevents creating multiple connections in serverless environment
+
+3. **MongoDB Atlas Network Access:**
+
+   - **CRITICAL:** Add `0.0.0.0/0` to your MongoDB Atlas Network Access whitelist
+   - This allows Vercel's dynamic IPs to connect to your database
+   - Go to MongoDB Atlas → Network Access → Add IP Address → Allow Access from Anywhere
+
+4. **Testing the Connection:**
+   - Use the `/api/health` endpoint to check MongoDB connection status
+   - Example: `https://your-app.vercel.app/api/health`
+
+## Project Structure
+
+- Frontend: `client/` - React/Vite app
+- Backend: `server/` - Express.js API (deployed as serverless functions)
+- Configuration: `vercel.json` - Vercel deployment configuration

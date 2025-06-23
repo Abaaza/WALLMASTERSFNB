@@ -48,6 +48,10 @@ async function connectToDatabase() {
     cached.promise = mongoose.connect(mongoURI, mongoOptions).then((mongoose) => {
       console.log("Connected to MongoDB");
       return mongoose;
+    }).catch((error) => {
+      console.error("MongoDB connection failed:", error);
+      cached.promise = null; // Reset promise on error
+      throw error;
     });
   }
 
@@ -55,16 +59,22 @@ async function connectToDatabase() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    console.error("Failed to establish database connection:", e);
     throw e;
   }
 
   return cached.conn;
 }
 
-// Initialize database connection
-connectToDatabase().catch((err) => {
-  console.error("MongoDB connection error:", err);
-  process.exit(1); // Exit if DB connection fails
+// Initialize database connection with timeout
+Promise.race([
+  connectToDatabase(),
+  new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Database connection timeout')), 10000)
+  )
+]).catch((err) => {
+  console.error("Initial MongoDB connection error:", err);
+  // Don't exit in serverless - let individual requests handle the error
 });
 
 const requiredEnvVars = [

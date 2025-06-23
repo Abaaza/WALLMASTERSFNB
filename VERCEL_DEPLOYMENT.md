@@ -6,119 +6,80 @@
 2. MongoDB database (MongoDB Atlas recommended)
 3. Email service credentials (Outlook/Office365)
 
-## Environment Variables Setup
+## Required Environment Variables
 
-In your Vercel dashboard, add the following environment variables:
+Set these environment variables in your Vercel dashboard:
 
-### Database
+### Database Configuration
 
 - `CONNECTION_STRING`: Your MongoDB connection string
+  ```
+  mongodb+srv://username:password@cluster.mongodb.net/database
+  ```
 
 ### JWT Configuration
 
-- `JWT_SECRET`: A secure random string for JWT token signing
-- `JWT_REFRESH_SECRET`: A secure random string for refresh token signing
+- `JWT_SECRET`: Secret key for JWT tokens (use a strong, random string)
+- `JWT_REFRESH_SECRET`: Secret key for refresh tokens (different from JWT_SECRET)
 
 ### Email Configuration
 
-- `EMAIL_USER`: Your email address (e.g., info@wall-masters.com)
-- `EMAIL_PASS`: Your email password or app-specific password
+- `EMAIL_USER`: Your Office 365 email address
+- `EMAIL_PASS`: Your Office 365 app password
 
-### Frontend Configuration
+### Optional Environment Variables
 
-After deployment, update your frontend environment:
-
-- `VITE_API_BASE_URL`: Your Vercel app URL + /api (e.g., https://your-app-name.vercel.app/api)
+- `VITE_API_BASE_URL`: Leave empty for production (uses relative URLs)
 
 ## Deployment Steps
 
-1. **Install Vercel CLI** (optional):
+1. **Build Configuration**: Already configured in `vercel.json`
+2. **Environment Variables**: Set all required variables in Vercel dashboard
+3. **Deploy**: Use `vercel deploy` or connect to GitHub for automatic deployments
 
-   ```bash
-   npm i -g vercel
-   ```
+## Performance Optimizations Applied
 
-2. **Deploy via GitHub**:
+- **MongoDB Connection Caching**: Reuses connections between serverless function calls
+- **Query Timeouts**: Added timeouts to prevent hanging requests
+- **Lean Queries**: Uses `.lean()` for better performance
+- **Cache Headers**: API responses include cache headers
+- **Request Timeouts**: Global timeout middleware to prevent 504 errors
 
-   - Connect your GitHub repository to Vercel
-   - Import your project on Vercel dashboard
-   - Set the environment variables listed above
-   - Deploy
+## Common Issues and Solutions
 
-3. **Deploy via CLI**:
-   ```bash
-   vercel
-   ```
+### CORS Errors
 
-## Project Structure
+- Fixed by using relative API URLs (`/api/...`) instead of absolute URLs
+- Removed hardcoded AWS API Gateway URLs
 
-- Frontend: `client/` - React/Vite app
-- Backend: `server/` - Express.js API (deployed as serverless functions)
-- Configuration: `vercel.json` - Vercel deployment configuration
+### Timeout Issues
 
-## API Routes
+- Increased function timeout to 90 seconds
+- Added connection timeouts (15s) and query timeouts (20s)
+- Optimized MongoDB connection with proper timeouts
 
-All backend routes are accessible under `/api/*`:
+### Environment Variables
 
-- Authentication: `/api/login`, `/api/register`
-- Products: `/api/products`
-- Orders: `/api/orders`
-- User management: `/api/users/*`
+- Use relative URLs in production (don't set VITE_API_BASE_URL)
+- Ensure all required variables are set in Vercel dashboard
 
-## Notes
+## Monitoring
 
-- The backend is deployed as serverless functions
-- Frontend is served as static files
-- MongoDB connection is established for each serverless function call
-- Email functionality uses SMTP with Office365
+Use Vercel's function logs to monitor:
 
-## Troubleshooting
+- MongoDB connection status
+- API response times
+- Error rates
 
-1. **MongoDB connection issues**: Ensure your CONNECTION_STRING is correct and accessible from Vercel
-2. **Email not working**: Check EMAIL_USER and EMAIL_PASS credentials
-3. **CORS issues**: The backend allows all origins (`*`) - adjust as needed for production
-4. **Build errors**: Ensure all dependencies are listed in package.json files
+## Database Connection Issues
 
-5. **Set environment variables in Vercel dashboard:**
-   - Go to Settings → Environment Variables
-   - Add all variables from `.env` file:
-     - `CONNECTION_STRING` - MongoDB connection string
-     - `JWT_SECRET` - JWT secret key
-     - `JWT_REFRESH_SECRET` - JWT refresh secret
-     - `EMAIL_USER` - Email for notifications
-     - `EMAIL_PASS` - Email password
-     - `VITE_API_BASE_URL` - Set to your production URL (e.g., https://your-app.vercel.app)
+If you see timeout errors:
 
-## MongoDB Configuration for Serverless
-
-**Important:** The MongoDB connection has been optimized for serverless deployment:
-
-1. **Connection Options:**
-
-   - Removed deprecated options: `useNewUrlParser`, `useUnifiedTopology`, `bufferMaxEntries`
-   - Added serverless optimizations:
-     - `maxPoolSize: 1` - Limits connection pool for serverless
-     - `serverSelectionTimeoutMS: 5000` - Faster timeout for serverless
-     - `connectTimeoutMS: 10000` - Connection timeout
-     - `bufferCommands: false` - Don't buffer commands when disconnected
-
-2. **Connection Caching:**
-
-   - Implemented connection caching to reuse connections across function invocations
-   - Prevents creating multiple connections in serverless environment
-
-3. **MongoDB Atlas Network Access:**
-
-   - **CRITICAL:** Add `0.0.0.0/0` to your MongoDB Atlas Network Access whitelist
-   - This allows Vercel's dynamic IPs to connect to your database
-   - Go to MongoDB Atlas → Network Access → Add IP Address → Allow Access from Anywhere
-
-4. **Testing the Connection:**
-   - Use the `/api/health` endpoint to check MongoDB connection status
-   - Example: `https://your-app.vercel.app/api/health`
+1. Check MongoDB Atlas network access (allow 0.0.0.0/0)
+2. Verify connection string format
+3. Check database user permissions
+4. Monitor MongoDB Atlas metrics for connection limits
 
 ## Project Structure
 
-- Frontend: `client/` - React/Vite app
-- Backend: `server/` - Express.js API (deployed as serverless functions)
-- Configuration: `vercel.json` - Vercel deployment configuration
+- Frontend: `client/`

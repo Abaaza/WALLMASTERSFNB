@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../src/store";
 import { getUserId, getAuthToken } from "../src/ProfileScreens/authUtils";
+import { API_BASE_URL } from "../src/api";
 
 const SHIPPING_COST = 70;
 const FREE_SHIPPING_THRESHOLD = 2000;
@@ -89,7 +90,7 @@ const CheckoutPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${uid}`,
+          `${API_BASE_URL}/addresses/${uid}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -160,7 +161,7 @@ const CheckoutPage: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/orders",
+        `${API_BASE_URL}/orders`,
         orderData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -180,7 +181,7 @@ const CheckoutPage: React.FC = () => {
 
         try {
           await axios.post(
-            `https://nhts6foy5k.execute-api.me-south-1.amazonaws.com/dev/addresses/${userId}`,
+            `${API_BASE_URL}/addresses/${userId}`,
             { address: addressData },
             { headers: { Authorization: `Bearer ${token}` } }
           );

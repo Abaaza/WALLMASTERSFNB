@@ -36,6 +36,8 @@ const mongoOptions = {
   serverSelectionTimeoutMS: 5000,
   connectTimeoutMS: 10000,
   bufferCommands: false, // Don't buffer commands when disconnected
+  maxIdleTimeMS: 30000,
+  socketTimeoutMS: 30000,
 };
 
 // Connect to MongoDB with connection caching
@@ -80,6 +82,25 @@ Promise.race([
 ]).catch((err) => {
   console.error("Initial MongoDB connection error:", err);
   // Don't exit in serverless - let individual requests handle the error
+});
+
+// Add request timeout middleware
+app.use((req, res, next) => {
+  // Set a timeout for all requests
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(504).json({
+        error: 'Request timeout',
+        message: 'The request took too long to process'
+      });
+    }
+  }, 85000); // 85 seconds to stay under Vercel's 90s limit
+
+  res.on('finish', () => {
+    clearTimeout(timeout);
+  });
+
+  next();
 });
 
 const requiredEnvVars = [
@@ -207,31 +228,39 @@ app.get("/health", async (req, res) => {
     
     let dbTestResult = "not tested";
     let dbError = null;
+    let productCount = 0;
     
     try {
       // Test database connection with timeout
       await Promise.race([
         connectToDatabase(),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Health check DB timeout')), 5000)
+          setTimeout(() => reject(new Error('Health check DB timeout (5s)')), 5000)
         )
       ]);
       
-      // Try to count products as a real DB test
-      const productCount = await Product.countDocuments();
+      // Try to count products as a real DB test with timeout
+      productCount = await Promise.race([
+        Product.countDocuments(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Product count timeout')), 3000)
+        )
+      ]);
+      
       dbTestResult = `connected (${productCount} products)`;
     } catch (error) {
       dbError = error.message;
       dbTestResult = "failed";
     }
     
-    res.json({
-      status: "ok",
+    const healthData = {
+      status: dbTestResult === "failed" ? "degraded" : "ok",
       timestamp: new Date().toISOString(),
       mongodb: {
         status: mongoStates[mongoStatus] || "unknown",
         readyState: mongoStatus,
         testResult: dbTestResult,
+        productCount: productCount,
         error: dbError
       },
       environment: {
@@ -240,8 +269,17 @@ app.get("/health", async (req, res) => {
         hasEmailConfig: !!process.env.EMAIL_USER,
         connectionStringPreview: process.env.CONNECTION_STRING ? 
           process.env.CONNECTION_STRING.substring(0, 20) + "..." : "missing"
+      },
+      performance: {
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage()
       }
-    });
+    };
+    
+    // Set appropriate status code
+    const statusCode = dbTestResult === "failed" ? 503 : 200;
+    
+    res.status(statusCode).json(healthData);
   } catch (error) {
     console.error("Health check error:", error);
     res.status(500).json({
@@ -258,12 +296,27 @@ app.get("/products", async (req, res) => {
     console.log("Products endpoint called");
     console.log("MongoDB connection state:", mongoose.connection.readyState);
     
-    // Ensure database connection
-    await connectToDatabase();
+    // Ensure database connection with timeout
+    await Promise.race([
+      connectToDatabase(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database connection timeout')), 15000)
+      )
+    ]);
     console.log("Database connection established");
     
-    const products = await Product.find();
+    // Add timeout to the query itself
+    const products = await Promise.race([
+      Product.find().lean().exec(), // Use lean() for better performance
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 20000)
+      )
+    ]);
+    
     console.log(`Found ${products.length} products`);
+    
+    // Set cache headers for better performance
+    res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
     res.json(products);
   } catch (error) {
     console.error("Products endpoint error:", error);

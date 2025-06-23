@@ -4,7 +4,7 @@
   "installCommand": "npm install --prefix client && npm install --prefix api",
   "functions": {
     "api/index.js": {
-      "maxDuration": 30
+      "maxDuration": 90
     }
   },
   "rewrites": [
@@ -16,5 +16,8 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "MONGODB_TIMEOUT": "30000"
+  }
 } 

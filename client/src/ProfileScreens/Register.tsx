@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Center,
   VStack,
@@ -12,6 +12,11 @@ import {
   useToast,
   Icon,
   useColorModeValue,
+  Alert,
+  AlertIcon,
+  AlertDescription,
+  CloseButton,
+  Box,
 } from "@chakra-ui/react";
 import { IoPersonOutline } from "react-icons/io5";
 import { AiOutlineLock } from "react-icons/ai";
@@ -27,21 +32,35 @@ const Register: React.FC = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
 
+  // Clear error after 30 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleRegister = async () => {
+    setError(null); // Clear any previous errors
+    
     if (!name || !email || !password) {
-      toast({
-        title: "Input Error",
-        description: "Please fill all fields.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      setError("Please fill all fields.");
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${API_BASE_URL}/register`,
@@ -60,7 +79,7 @@ const Register: React.FC = () => {
           title: "Registration Successful",
           description: "You have registered successfully.",
           status: "success",
-          duration: 3000,
+          duration: 5000,
           isClosable: true,
         });
 
@@ -69,20 +88,24 @@ const Register: React.FC = () => {
         throw new Error("Missing token or user data in response");
       }
     } catch (error) {
-      const errorMessage =
-        axios.isAxiosError(error) && error.response
-          ? error.response.data.message
-          : "An unexpected error occurred.";
+      let errorMessage = "An unexpected error occurred.";
+      
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 400) {
+          errorMessage = error.response.data.message || "Invalid input data.";
+        } else if (error.response.status === 409) {
+          errorMessage = "Email already exists. Please use a different email or try logging in.";
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
 
       console.error("Registration Error:", errorMessage);
-
-      toast({
-        title: "Registration Error",
-        description: errorMessage,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,6 +123,22 @@ const Register: React.FC = () => {
         <Text fontSize="2xl" fontWeight="800">
           Register to your Account
         </Text>
+
+        {error && (
+          <Alert status="error" borderRadius="md">
+            <AlertIcon />
+            <Box flex="1">
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+            <CloseButton
+              alignSelf="flex-start"
+              position="relative"
+              right={-1}
+              top={-1}
+              onClick={() => setError(null)}
+            />
+          </Alert>
+        )}
 
         <InputGroup>
           <InputLeftElement pointerEvents="none">
@@ -139,7 +178,7 @@ const Register: React.FC = () => {
             <Icon as={AiOutlineLock} color={placeholderColor} />
           </InputLeftElement>
           <Input
-            placeholder="Enter your Password"
+            placeholder="Enter your Password (min 6 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type={passwordVisible ? "text" : "password"}
@@ -166,6 +205,7 @@ const Register: React.FC = () => {
           w="full"
           _hover={{ bg: buttonHoverBgColor }}
           onClick={handleRegister}
+          isLoading={isLoading}
           borderRadius="md"
           p={3}
           fontSize="md"

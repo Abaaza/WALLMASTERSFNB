@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -19,6 +19,11 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  CloseButton,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { IoPersonOutline } from "react-icons/io5";
@@ -37,22 +42,28 @@ const Login: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const toast = useToast();
   const { login } = useAuth();
 
+  // Clear error after 30 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError(null); // Clear any previous errors
 
     if (!email || !password) {
-      toast({
-        title: "Input Error",
-        description: "Both email and password are required.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      setError("Both email and password are required.");
       return;
     }
 
@@ -79,20 +90,28 @@ const Login: React.FC = () => {
         title: "Login Successful",
         description: "Welcome back!",
         status: "success",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
 
       navigate("/profile");
     } catch (error: unknown) {
       console.error("Login error:", error);
-      toast({
-        title: "Login Error",
-        description: "Invalid email or password. Please try again.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      
+      let errorMessage = "Invalid email or password. Please try again.";
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.response?.status === 404) {
+          errorMessage = "User not found. Please check your email or register for a new account.";
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.code === 'NETWORK_ERROR') {
+          errorMessage = "Network error. Please check your internet connection.";
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +123,7 @@ const Login: React.FC = () => {
         title: "Input Error",
         description: "Please enter your email address.",
         status: "error",
-        duration: 3000,
+        duration: 30000,
         isClosable: true,
       });
       return;
@@ -119,7 +138,7 @@ const Login: React.FC = () => {
         title: "Reset Email Sent",
         description: "Check your inbox for password reset instructions.",
         status: "success",
-        duration: 3000,
+        duration: 30000,
         isClosable: true,
       });
       setIsForgotPasswordOpen(false);
@@ -130,7 +149,7 @@ const Login: React.FC = () => {
         title: "Error",
         description: "Failed to send reset email. Try again later.",
         status: "error",
-        duration: 3000,
+        duration: 30000,
         isClosable: true,
       });
     }
@@ -150,6 +169,22 @@ const Login: React.FC = () => {
         <Text fontSize="2xl" fontWeight="600">
           Login to your Account
         </Text>
+
+        {error && (
+          <Alert status="error" borderRadius="md">
+            <AlertIcon />
+            <Box flex="1">
+              <AlertDescription>{error}</AlertDescription>
+            </Box>
+            <CloseButton
+              alignSelf="flex-start"
+              position="relative"
+              right={-1}
+              top={-1}
+              onClick={() => setError(null)}
+            />
+          </Alert>
+        )}
 
         <InputGroup>
           <InputLeftElement pointerEvents="none">

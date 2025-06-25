@@ -271,18 +271,24 @@ const NavBar: React.FC = () => {
               <Select
                 w="100px"
                 onChange={handleLanguageChange}
-                defaultValue={i18n.language}
+                value={i18n.language}
                 variant="filled"
                 bg="transparent"
                 icon={<ChevronDownIcon color="white" />}
                 color="white"
-                _focus={{ bg: "white", color: "black" }}
-                _hover={{ bg: "white", color: "black" }}
+                _focus={{ bg: "rgba(255,255,255,0.1)", color: "white" }}
+                _hover={{ bg: "rgba(255,255,255,0.1)", color: "white" }}
+                sx={{
+                  option: {
+                    color: "black",
+                    bg: "white"
+                  }
+                }}
               >
-                <option value="en" style={{ color: "black" }}>
+                <option value="en" style={{ color: "black", backgroundColor: "white" }}>
                   English
                 </option>
-                <option value="ar" style={{ color: "black" }}>
+                <option value="ar" style={{ color: "black", backgroundColor: "white" }}>
                   العربية
                 </option>
               </Select>
@@ -364,11 +370,18 @@ const NavBar: React.FC = () => {
               <Select
                 w="100px"
                 onChange={handleLanguageChange}
-                defaultValue={i18n.language}
+                value={i18n.language}
                 variant="filled"
-                bg="white"
-                color="black"
-                _focus={{ bg: "white", color: "black" }}
+                bg={useColorModeValue("white", "gray.700")}
+                color={useColorModeValue("black", "white")}
+                _focus={{ bg: useColorModeValue("gray.100", "gray.600"), color: useColorModeValue("black", "white") }}
+                _hover={{ bg: useColorModeValue("gray.100", "gray.600"), color: useColorModeValue("black", "white") }}
+                sx={{
+                  option: {
+                    color: useColorModeValue("black", "white"),
+                    bg: useColorModeValue("white", "gray.700")
+                  }
+                }}
               >
                 <option value="en">English</option>
                 <option value="ar">العربية</option>

@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const { connectToDatabase, User } = require('../_models');
+const { connectToDatabase, User } = require('./_models');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -12,7 +11,11 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { userId } = req.query;
+  const userId = req.query.userId || req.body.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
 
   if (req.method === 'GET') {
     // Retrieve addresses
@@ -27,7 +30,7 @@ module.exports = async (req, res) => {
       res.status(200).json(user.savedAddresses || []);
     } catch (error) {
       console.error("Error loading addresses:", error);
-      res.status(500).json({ message: "Failed to load addresses", error });
+      res.status(500).json({ message: "Failed to load addresses", error: error.message });
     }
   } 
   else if (req.method === 'POST') {
@@ -74,7 +77,48 @@ module.exports = async (req, res) => {
       });
     } catch (error) {
       console.error("Error saving address:", error);
-      res.status(500).json({ message: "Failed to save address.", error });
+      res.status(500).json({ message: "Failed to save address.", error: error.message });
+    }
+  }
+  else if (req.method === 'DELETE') {
+    // Delete address
+    try {
+      await connectToDatabase();
+      
+      const { addressId } = req.query;
+      
+      if (!addressId) {
+        return res.status(400).json({ message: "Address ID is required" });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const addressIndex = user.savedAddresses.findIndex(
+        (address) => address._id.toString() === addressId
+      );
+
+      if (addressIndex === -1) {
+        return res.status(404).json({ message: "Address not found" });
+      }
+
+      user.savedAddresses.splice(addressIndex, 1);
+
+      if (user.savedAddresses.length === 1) {
+        user.savedAddresses[0].isDefault = true;
+      }
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Address deleted successfully",
+        savedAddresses: user.savedAddresses,
+      });
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      res.status(500).json({ message: "Failed to delete address", error: error.message });
     }
   }
   else {

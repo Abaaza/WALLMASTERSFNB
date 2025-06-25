@@ -1,4 +1,4 @@
-const { connectToDatabase, Order } = require('../_models');
+const { connectToDatabase, Order } = require('./_models');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -19,8 +19,14 @@ module.exports = async (req, res) => {
   try {
     await connectToDatabase();
     
-    const { userId } = req.query;
-    const orders = await Order.find({ user: userId });
+    // Get userId from query parameter
+    const userId = req.query.userId || req.query.user;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    
+    const orders = await Order.find({ user: userId }).lean();
     
     res.status(200).json(orders);
   } catch (error) {

@@ -1,4 +1,4 @@
-const { connectToDatabase, User } = require('../_models');
+const { connectToDatabase, User } = require('./_models');
 
 module.exports = async (req, res) => {
   // Set CORS headers
@@ -19,11 +19,10 @@ module.exports = async (req, res) => {
   try {
     await connectToDatabase();
     
-    const { userId } = req.query;
-    const { product } = req.body;
+    const { userId, product } = req.body;
 
-    if (!product || !product.productId) {
-      return res.status(400).json({ message: "Invalid Product Data" });
+    if (!userId || !product || !product.productId) {
+      return res.status(400).json({ message: "Invalid data provided" });
     }
 
     if (!Array.isArray(product.images) || product.images.length === 0) {

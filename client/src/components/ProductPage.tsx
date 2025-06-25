@@ -224,6 +224,8 @@ const ProductPage: React.FC = () => {
         onClick={() => navigate(-1)}
         mb={4}
         mt={2}
+        size="sm"
+        maxW="120px"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ duration: 0.2 }}
@@ -243,7 +245,10 @@ const ProductPage: React.FC = () => {
               position="absolute"
               top={3}
               right={3}
-              size="sm"
+              size="xs"
+              fontSize="xs"
+              h="28px"
+              maxW="110px"
               onClick={handleSaveForLater}
               disabled={isSaved}
               _hover={{

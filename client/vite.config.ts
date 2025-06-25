@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({
+    jsxImportSource: '@emotion/react',
+    babel: {
+      plugins: ['@emotion/babel-plugin']
+    }
+  })],
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -13,14 +18,17 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            if (id.includes('@emotion')) {
+              return 'emotion';
+            }
+            if (id.includes('@chakra-ui')) {
+              return 'chakra';
+            }
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor';
             }
             if (id.includes('react-router')) {
               return 'router';
-            }
-            if (id.includes('@chakra-ui') || id.includes('@emotion')) {
-              return 'ui';
             }
             return 'vendor';
           }
@@ -33,6 +41,10 @@ export default defineConfig({
     open: true
   },
   define: {
-    'process.env': process.env
+    'process.env': {},
+    global: 'globalThis'
+  },
+  optimizeDeps: {
+    include: ['@emotion/react', '@emotion/styled', '@chakra-ui/react']
   }
 })

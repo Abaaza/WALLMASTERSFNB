@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
-
+import { useAuth } from "../components/authContext";
 
 type Product = {
   productId: string;
@@ -116,6 +116,7 @@ const MyOrders: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const textColor = useColorModeValue("gray.700", "gray.300");
   const toast = useToast();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadOrders();
@@ -123,11 +124,25 @@ const MyOrders: React.FC = () => {
 
   const loadOrders = async () => {
     try {
+      if (!isAuthenticated) {
+        toast({
+          title: "User Not Authenticated",
+          description: "Please log in to view orders.",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const userId = localStorage.getItem("userId")?.replace(/["\\]/g, "");
-      if (!userId) {
+      const authToken = localStorage.getItem("authToken");
+      
+      if (!userId || !authToken) {
         toast({
           title: "User Not Found",
-          description: "No user ID found. Please log in.",
+          description: "No user ID or token found. Please log in.",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -137,7 +152,8 @@ const MyOrders: React.FC = () => {
       }
 
       const response = await axios.get<Order[]>(
-        `${API_BASE_URL}/orders-get?userId=${userId}`
+        `${API_BASE_URL}/orders-get?userId=${userId}`,
+        { headers: { Authorization: `Bearer ${authToken}` } }
       );
 
       setOrders(response.data);

@@ -28,6 +28,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../api";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/userSlice";
+import { useAuth } from "../components/authContext";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -39,6 +40,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const toast = useToast();
+  const { login } = useAuth();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -56,31 +58,32 @@ const Login: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
-        email: email.toLowerCase(),
-        password,
-      });
-
-      const { token, refreshToken, user } = response.data;
-      const userId = user?._id;
-
-      if (token && refreshToken && userId) {
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("userId", userId);
-
+      await login(email, password);
+      
+      // Update Redux state as well
+      const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+      const userEmail = localStorage.getItem("userEmail");
+      
+      if (userId) {
         dispatch(
           setUser({
             userId,
-            name: user.name || "",
-            email: user.email || "",
+            name: userName || "",
+            email: userEmail || "",
           })
         );
-
-        navigate("/profile");
-      } else {
-        throw new Error("Invalid response from server");
       }
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      navigate("/profile");
     } catch (error: unknown) {
       console.error("Login error:", error);
       toast({

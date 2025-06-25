@@ -1,5 +1,3 @@
-console.log("Starting serverless function initialization...");
-
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -10,13 +8,9 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
-console.log("Dependencies loaded, loading models...");
-
 const User = require("./models/user");
 const Order = require("./models/order");
 const serverless = require("serverless-http");
-
-console.log("Models loaded, creating express app...");
 
 // Cache the database connection
 let cached = global.mongoose;
@@ -28,14 +22,10 @@ if (!cached) {
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the Heroku port or fallback to 3000
 
-console.log("Express app created, configuring middleware...");
-
 // Middleware
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-console.log("Middleware configured, setting up database connection...");
 
 // Database connection
 const mongoURI = process.env.CONNECTION_STRING;
@@ -44,10 +34,10 @@ const mongoURI = process.env.CONNECTION_STRING;
 const mongoOptions = {
   maxPoolSize: 1, // Optimize for serverless
   serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 5000,
   bufferCommands: false, // Don't buffer commands when disconnected
   maxIdleTimeMS: 30000,
-  socketTimeoutMS: 30000,
+  socketTimeoutMS: 15000,
 };
 
 // Connect to MongoDB with connection caching
@@ -213,6 +203,14 @@ app.post("/login", async (req, res) => {
     console.error("Login error:", error);
     res.status(500).json({ message: "Login failed", error });
   }
+});
+
+// Quick test endpoint (no DB dependency)
+app.get("/api/quick-test", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // Root Route
@@ -991,7 +989,6 @@ app.post("/refresh-token", async (req, res) => {
 });
 
 // ------------------ SERVER OR SERVERLESS HANDLER ------------------
-console.log("Setting up serverless handler...");
 
 if (require.main === module) {
   // If run directly, start an express server
@@ -1000,6 +997,5 @@ if (require.main === module) {
   });
 } else {
   // Export handler for Vercel serverless functions
-  console.log("Exporting serverless handler...");
   module.exports = serverless(app);
 }

@@ -90,7 +90,7 @@ const CheckoutPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${API_BASE_URL}/addresses/${uid}`,
+          `${API_BASE_URL}/addresses?userId=${uid}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -181,7 +181,7 @@ const CheckoutPage: React.FC = () => {
 
         try {
           await axios.post(
-            `${API_BASE_URL}/addresses/${userId}`,
+            `${API_BASE_URL}/addresses?userId=${userId}`,
             { address: addressData },
             { headers: { Authorization: `Bearer ${token}` } }
           );

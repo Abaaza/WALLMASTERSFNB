@@ -137,7 +137,7 @@ const MyOrders: React.FC = () => {
       }
 
       const response = await axios.get<Order[]>(
-        `${API_BASE_URL}/orders/${userId}`
+        `${API_BASE_URL}/orders-get?userId=${userId}`
       );
 
       setOrders(response.data);

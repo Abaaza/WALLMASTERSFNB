@@ -87,7 +87,7 @@ const SavedItems: React.FC = () => {
     const fetchSavedItems = async () => {
       try {
         const response = await axios.get<SavedItem[]>(
-          `${API_BASE_URL}/saved-items/${cleanedUserId}`,
+          `${API_BASE_URL}/saved-items-get?userId=${cleanedUserId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSavedItems(response.data);
@@ -145,7 +145,7 @@ const SavedItems: React.FC = () => {
   const handleRemove = async (productId: string) => {
     try {
       await axios.delete(
-        `${API_BASE_URL}/saved-items/${cleanedUserId}/${productId}`,
+        `${API_BASE_URL}/saved-items-delete?userId=${cleanedUserId}&productId=${productId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSavedItems((prevItems) =>

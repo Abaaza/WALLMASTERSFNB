@@ -82,7 +82,7 @@ const ProfilePage: React.FC = () => {
 
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/user/details`,
+          `${API_BASE_URL}/user-details`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

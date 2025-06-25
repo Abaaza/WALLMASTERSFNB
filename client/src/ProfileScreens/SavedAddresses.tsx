@@ -61,7 +61,7 @@ const SavedAddresses: React.FC = () => {
     const loadSavedAddresses = async () => {
       try {
         const response = await axios.get<Address[]>(
-          `${API_BASE_URL}/addresses/${userId}`,
+          `${API_BASE_URL}/addresses?userId=${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         let sortedAddresses = response.data.sort((a, b) =>
@@ -75,7 +75,7 @@ const SavedAddresses: React.FC = () => {
         ) {
           await setDefaultAddress(sortedAddresses[0]._id, false);
           const refresh = await axios.get<Address[]>(
-            `${API_BASE_URL}/addresses/${userId}`,
+            `${API_BASE_URL}/addresses?userId=${userId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           sortedAddresses = refresh.data.sort((a, b) =>
@@ -111,7 +111,7 @@ const SavedAddresses: React.FC = () => {
 
     try {
       await axios.delete(
-        `${API_BASE_URL}/addresses/${userId}/${id}`,
+        `${API_BASE_URL}/addresses?userId=${userId}&addressId=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -125,7 +125,7 @@ const SavedAddresses: React.FC = () => {
       if (updated.length > 0 && !updated.some((addr) => addr.isDefault)) {
         await setDefaultAddress(updated[0]._id, false);
         const refresh = await axios.get<Address[]>(
-          `${API_BASE_URL}/addresses/${userId}`,
+          `${API_BASE_URL}/addresses?userId=${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const sorted = refresh.data.sort((a, b) =>
@@ -171,7 +171,7 @@ const SavedAddresses: React.FC = () => {
 
     try {
       await axios.put(
-        `${API_BASE_URL}/addresses/${userId}/default/${addressId}`,
+        `${API_BASE_URL}/address-set-default?userId=${userId}&addressId=${addressId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

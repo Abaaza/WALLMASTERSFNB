@@ -72,7 +72,7 @@ const ProductPage: React.FC = () => {
 
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/saved-items/${userId}`,
+        `${API_BASE_URL}/saved-items-get?userId=${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -158,8 +158,8 @@ const ProductPage: React.FC = () => {
 
     try {
       await axios.post(
-        `${API_BASE_URL}/save-for-later/${userId}`,
-        { product: productData },
+        `${API_BASE_URL}/save-item`,
+        { userId, product: productData },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,

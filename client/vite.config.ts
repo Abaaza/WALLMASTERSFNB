@@ -11,22 +11,11 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('@emotion')) {
-              return 'emotion';
-            }
-            if (id.includes('@chakra-ui')) {
-              return 'chakra';
-            }
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor';
-            }
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            return 'vendor';
-          }
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
+          motion: ['framer-motion']
         }
       }
     }

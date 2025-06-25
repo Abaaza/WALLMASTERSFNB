@@ -36,6 +36,10 @@ const OrderItemDetails: React.FC<{ product: Product }> = ({ product }) => {
   const itemTextColor = useColorModeValue("gray.800", "gray.200");
   const itemPriceColor = useColorModeValue("#ff6347", "#ff867f");
 
+  // Fallback image if product.image is missing or invalid
+  const fallbackImage = "https://via.placeholder.com/150/f0f0f0/888888?text=Product";
+  const imageUrl = product.image && product.image.trim() !== "" ? product.image : fallbackImage;
+
   return (
     <HStack
       align="center"
@@ -49,11 +53,16 @@ const OrderItemDetails: React.FC<{ product: Product }> = ({ product }) => {
       transition="all 0.2s ease"
     >
       <Image
-        src={product.image}
+        src={imageUrl}
         alt={product.name}
         boxSize="80px"
         borderRadius="md"
         objectFit="contain"
+        fallbackSrc={fallbackImage}
+        onError={(e) => {
+          console.log("Image failed to load:", product.image);
+          e.currentTarget.src = fallbackImage;
+        }}
       />
       <VStack align="start" spacing={1} ml={4} color={itemTextColor}>
         <Text fontSize="md" fontWeight="600" noOfLines={1}>
@@ -155,6 +164,19 @@ const MyOrders: React.FC = () => {
         `${API_BASE_URL}/orders-get?userId=${userId}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
+
+      console.log("Orders data:", response.data);
+      // Debug product images
+      response.data.forEach((order, orderIndex) => {
+        order.products.forEach((product, productIndex) => {
+          console.log(`Order ${orderIndex + 1}, Product ${productIndex + 1}:`, {
+            name: product.name,
+            image: product.image,
+            hasImage: !!product.image,
+            imageLength: product.image?.length || 0
+          });
+        });
+      });
 
       setOrders(response.data);
     } catch (error) {

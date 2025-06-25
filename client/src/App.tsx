@@ -132,7 +132,7 @@ function AppContent() {
         <MobileAppBanner onClose={handleCloseBanner} />
       )}
 
-      <Box flex="1" display="flex" flexDirection="column" pt="60px">
+      <Box flex="1" display="flex" flexDirection="column" pt="80px">
         <Suspense
           fallback={
             <Center flex="1">

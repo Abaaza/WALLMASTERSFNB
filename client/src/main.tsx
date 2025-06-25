@@ -1,16 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { ChakraProvider } from "@chakra-ui/react";
-import { ColorModeScript } from "@chakra-ui/react";
-import { I18nextProvider } from "react-i18next";
-import App from "./App";
-import theme from "./components/theme";
-import "./index.css";
-import i18n from "./assets/i18n";
-import { Provider } from "react-redux";
-import store from "./store";
+import * as React from 'react'
+import ReactDOM from 'react-dom/client'
+import { ChakraProvider } from '@chakra-ui/react'
+import { ColorModeScript } from '@chakra-ui/react'
+import { I18nextProvider } from 'react-i18next'
+import App from './App'
+import theme from './components/theme'
+import './index.css'
+import i18n from './assets/i18n'
+import { Provider } from 'react-redux'
+import store from './store'
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <Provider store={store}>
@@ -21,4 +21,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </ChakraProvider>
     </Provider>
   </React.StrictMode>,
-);
+)

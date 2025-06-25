@@ -26,9 +26,7 @@ import DesktopProductSlider from "./DesktopProductSlider";
 import MobileProductSlider from "./MobileProductSlider";
 import AutoSlideShow from "./AutoSlideShow";
 
-const MotionBox = motion(Box);
-const MotionHeading = motion(Heading);
-const MotionButton = motion(Button);
+// Fixed: Remove deprecated motion(Component) syntax - will use motion.div with Box styling
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -96,32 +94,31 @@ const HomePage: React.FC = () => {
   return (
     <Box minH="100vh" bg={bg} p={5}>
       {/* Hero / Slideshow Section */}
-      <MotionBox
+      <motion.div
         onClick={goToProductGrid}
-        cursor="pointer"
-        overflow="hidden"
-        // Animate the slideshow container
+        style={{
+          cursor: "pointer",
+          overflow: "hidden",
+          marginBottom: "2.5rem",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
-        mb={10}
-        boxShadow="xl"
       >
         {imagesToShow && <AutoSlideShow images={imagesToShow} />}
-      </MotionBox>
+      </motion.div>
 
       {/* Top Sellers Section */}
-      <MotionHeading
-        textAlign="center"
-        mb={4}
-        size="lg"
+      <motion.div
+        style={{ textAlign: "center", marginBottom: "1rem" }}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        {t("topSellers")}
-      </MotionHeading>
+        <Heading size="lg">{t("topSellers")}</Heading>
+      </motion.div>
 
       <Box textAlign="center" mt={10}>
         {ProductSliderToShow && <ProductSliderToShow />}
@@ -129,20 +126,17 @@ const HomePage: React.FC = () => {
 
       {/* Contact Us Form Section */}
       <Container maxW=" " mt={10} bg={cardBg} p={8} rounded="md" boxShadow="xl">
-        <MotionHeading
-          as="h2"
-          size="lg"
-          mb={4}
-          textAlign="center"
+        <motion.div
+          style={{ textAlign: "center", marginBottom: "1rem" }}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          {t("contactUs")}
-        </MotionHeading>
+          <Heading as="h2" size="lg">{t("contactUs")}</Heading>
+        </motion.div>
 
-        <MotionBox
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -178,22 +172,19 @@ const HomePage: React.FC = () => {
             </FormControl>
 
             <Flex justify="center" w="100%">
-              <MotionButton
+              <Button
                 bg="#ff6347"
                 color="white"
                 w="full"
                 _hover={{ bg: "#ff7b61" }}
                 size="lg"
                 onClick={handleSubmit}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
               >
                 {t("submitButton")}
-              </MotionButton>
+              </Button>
             </Flex>
           </VStack>
-        </MotionBox>
+        </motion.div>
       </Container>
     </Box>
   );

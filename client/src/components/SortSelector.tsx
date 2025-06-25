@@ -83,8 +83,8 @@ const SortSelector: React.FC<SortSelectorProps> = ({
             {selectedTheme ? t(selectedTheme) : t("theme")}
           </MenuButton>
           <MenuList bg={menuBg} color={menuTextColor}>
-            {themes.map((theme) => (
-              <MenuItem key={theme} onClick={() => handleThemeSelect(theme)}>
+            {themes.filter(theme => theme && theme.trim()).map((theme, index) => (
+              <MenuItem key={`theme-${theme}-${index}`} onClick={() => handleThemeSelect(theme)}>
                 {t(theme)}
               </MenuItem>
             ))}
@@ -100,9 +100,9 @@ const SortSelector: React.FC<SortSelectorProps> = ({
           </MenuButton>
           <MenuList bg={menuBg} color={menuTextColor}>
             <VStack align="start" spacing={1} p={2}>
-              {colors.map((color) => (
+              {colors.filter(color => color && color.trim()).map((color, index) => (
                 <Checkbox
-                  key={color}
+                  key={`color-${color}-${index}`}
                   isChecked={selectedColors.includes(color)}
                   onChange={() => handleColorSelect(color)}
                 >
@@ -126,8 +126,8 @@ const SortSelector: React.FC<SortSelectorProps> = ({
               : t("noOfPieces")}
           </MenuButton>
           <MenuList bg={menuBg} color={menuTextColor}>
-            {threePOptions.map(({ value, label }) => (
-              <MenuItem key={value} onClick={() => handleThreePSelect(value)}>
+            {threePOptions.map(({ value, label }, index) => (
+              <MenuItem key={`threeP-${value}-${index}`} onClick={() => handleThreePSelect(value)}>
                 {t(label)}
               </MenuItem>
             ))}
@@ -163,8 +163,8 @@ const SortSelector: React.FC<SortSelectorProps> = ({
               {selectedTheme ? t(selectedTheme) : t("theme")}
             </MenuButton>
             <MenuList bg={menuBg} color={menuTextColor}>
-              {themes.map((theme) => (
-                <MenuItem key={theme} onClick={() => handleThemeSelect(theme)}>
+              {themes.filter(theme => theme && theme.trim()).map((theme, index) => (
+                <MenuItem key={`mobile-theme-${theme}-${index}`} onClick={() => handleThemeSelect(theme)}>
                   {t(theme)}
                 </MenuItem>
               ))}
@@ -180,9 +180,9 @@ const SortSelector: React.FC<SortSelectorProps> = ({
             </MenuButton>
             <MenuList bg={menuBg} color={menuTextColor}>
               <VStack align="start" spacing={1} p={2}>
-                {colors.map((color) => (
+                {colors.filter(color => color && color.trim()).map((color, index) => (
                   <Checkbox
-                    key={color}
+                    key={`mobile-color-${color}-${index}`}
                     isChecked={selectedColors.includes(color)}
                     onChange={() => handleColorSelect(color)}
                   >
@@ -206,8 +206,8 @@ const SortSelector: React.FC<SortSelectorProps> = ({
                 : t("noOfPieces")}
             </MenuButton>
             <MenuList bg={menuBg} color={menuTextColor}>
-              {threePOptions.map(({ value, label }) => (
-                <MenuItem key={value} onClick={() => handleThreePSelect(value)}>
+              {threePOptions.map(({ value, label }, index) => (
+                <MenuItem key={`mobile-threeP-${value}-${index}`} onClick={() => handleThreePSelect(value)}>
                   {t(label)}
                 </MenuItem>
               ))}

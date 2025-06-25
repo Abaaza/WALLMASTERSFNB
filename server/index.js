@@ -101,7 +101,8 @@ transporter.verify((error, success) => {
 const productSchema = new mongoose.Schema(
   {},
   { collection: "products", strict: false }
-);const Product = mongoose.model("Product", productSchema);
+);
+const Product = mongoose.model("Product", productSchema);
 
 // ------------------ ROUTES ------------------
 
@@ -151,9 +152,119 @@ app.get("/", (req, res) => {
 // Fetch All Products
 app.get("/products", async (req, res) => {
   try {
+    // Original database code - now active
     const products = await Product.find();
     res.json(products);
+    
+    // Mock data - commented out since we're using real database
+    // const mockProducts = [
+    //   {
+    //     _id: "product_1",
+    //     id: "product_1", // Add id field for frontend compatibility
+    //     name: "Modern Abstract Art",
+    //     theme: "modern",
+    //     color: ["black", "white"],
+    //     threePiece: "No",
+    //     images: [
+    //       "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop",
+    //       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"
+    //     ],
+    //     variants: [
+    //       {
+    //         size: "Small",
+    //         price: 150,
+    //         displayPrice: "150 EGP"
+    //       },
+    //       {
+    //         size: "Medium", 
+    //         price: 200,
+    //         displayPrice: "200 EGP"
+    //       },
+    //       {
+    //         size: "Large",
+    //         price: 300,
+    //         displayPrice: "300 EGP"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     _id: "product_2",
+    //     id: "product_2",
+    //     name: "Vintage Landscape",
+    //     theme: "vintage", 
+    //     color: ["brown", "green"],
+    //     threePiece: "Yes",
+    //     images: [
+    //       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
+    //       "https://images.unsplash.com/photo-1578322452946-b27cddedff99?w=400&h=300&fit=crop"
+    //     ],
+    //     variants: [
+    //       {
+    //         size: "Medium",
+    //         price: 250,
+    //         displayPrice: "250 EGP"
+    //       },
+    //       {
+    //         size: "Large",
+    //         price: 350,
+    //         displayPrice: "350 EGP"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     _id: "product_3", 
+    //     id: "product_3",
+    //     name: "Contemporary Geometric",
+    //     theme: "contemporary",
+    //     color: ["blue", "white"],
+    //     threePiece: "No",
+    //     images: [
+    //       "https://images.unsplash.com/photo-1578322452946-b27cddedff99?w=400&h=300&fit=crop",
+    //       "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop"
+    //     ],
+    //     variants: [
+    //       {
+    //         size: "Small",
+    //         price: 180,
+    //         displayPrice: "180 EGP"
+    //       },
+    //       {
+    //         size: "Medium",
+    //         price: 230,
+    //         displayPrice: "230 EGP"
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     _id: "product_4",
+    //     id: "product_4", 
+    //     name: "Classic Portrait",
+    //     theme: "classic",
+    //     color: ["gold", "brown"],
+    //     threePiece: "Yes",
+    //     images: [
+    //       "https://images.unsplash.com/photo-1582561297652-b18bc035da94?w=400&h=300&fit=crop",
+    //       "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=400&h=300&fit=crop"
+    //     ],
+    //     variants: [
+    //       {
+    //         size: "Large",
+    //         price: 400,
+    //         displayPrice: "400 EGP"
+    //       },
+    //       {
+    //         size: "Extra Large",
+    //         price: 500,
+    //         displayPrice: "500 EGP"
+    //       }
+    //     ]
+    //   }
+    // ];
+    // 
+    // res.json(mockProducts);
+    
   } catch (error) {
+    console.error("Error fetching products:", error);
     res.status(500).send("Error fetching products.");
   }
 });

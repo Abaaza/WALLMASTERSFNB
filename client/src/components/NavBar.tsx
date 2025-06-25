@@ -54,9 +54,6 @@ type CartItem = {
   quantity: number;
 };
 
-const MotionBox = motion(Box);
-const MotionPopoverContent = motion(PopoverContent);
-
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure(); // For mobile menu
@@ -115,13 +112,9 @@ const NavBar: React.FC = () => {
   const badgeTextColor = useColorModeValue("white", "gray.800");
 
   const renderCartContent = (popoverOnClose: () => void) => (
-    <MotionPopoverContent
+    <PopoverContent
       bg={useColorModeValue("white", "gray.800")}
       color={useColorModeValue("gray.800", "white")}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
     >
       <PopoverArrow />
       <PopoverCloseButton onClick={popoverOnClose} />
@@ -173,7 +166,7 @@ const NavBar: React.FC = () => {
           </VStack>
         )}
       </PopoverBody>
-    </MotionPopoverContent>
+    </PopoverContent>
   );
 
   return (
@@ -343,15 +336,17 @@ const NavBar: React.FC = () => {
       {/* Mobile menu items displayed when isMobile and isOpen */}
       <AnimatePresence>
         {isMobile && isOpen && (
-          <MotionBox
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            mt={4}
-            p={4}
-            borderRadius="md"
-            boxShadow="md"
+            style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              borderRadius: '0.375rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+            }}
           >
             <VStack spacing={4} align="start">
               <Link fontWeight="500" onClick={() => handleLinkClick("/")}>
@@ -380,7 +375,7 @@ const NavBar: React.FC = () => {
               </Select>
               <ColorModeSwitch />
             </VStack>
-          </MotionBox>
+          </motion.div>
         )}
       </AnimatePresence>
     </Box>

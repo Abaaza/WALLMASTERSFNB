@@ -65,7 +65,8 @@ const DesktopProductSlider: React.FC = () => {
       limitedProducts.length === 0 &&
       translatedProducts.length > 0
     ) {
-      const featuredProducts = translatedProducts.filter((p) => p.featured);
+      // Show products that are either featured OR bestSeller
+      const featuredProducts = translatedProducts.filter((p) => p.featured || p.bestSeller);
       const randomProducts = getRandomProducts(featuredProducts, 15);
       setLimitedProducts(randomProducts);
     }

@@ -40,7 +40,7 @@ const MobileProductSlider: React.FC = () => {
 
   useEffect(() => {
     if (!limitedProducts && Array.isArray(products) && products.length > 0) {
-      const featuredProducts = products.filter((product) => product.featured);
+      const featuredProducts = products.filter((product) => product.featured || product.bestSeller);
       const randomProducts = getRandomProducts(featuredProducts, 15);
       setLimitedProducts(randomProducts);
     }
